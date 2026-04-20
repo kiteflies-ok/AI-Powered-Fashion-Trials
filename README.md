@@ -1,4 +1,4 @@
-# Virtual Try-On System
+# AI-Powered Fashion Trials
 
 An entirely self-contained, open-source AI Virtual Try-On application. The frontend uses **React + Vite** and the backend is a native **Python Flask** wrapper around the state-of-the-art **CatVTON** deep learning model.
 
