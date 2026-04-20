@@ -1,0 +1,22 @@
+torch --index-url https://download.pytorch.org/whl/cu126
+torchvision --index-url https://download.pytorch.org/whl/cu126
+accelerate
+git+https://github.com/huggingface/diffusers.git
+numpy
+opencv_python
+pillow
+PyYAML
+scipy
+setuptools
+scikit-image
+tqdm
+transformers
+fvcore
+cloudpickle
+omegaconf
+pycocotools
+av
+gradio
+peft
+huggingface_hub
+
