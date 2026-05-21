@@ -162,7 +162,7 @@ class CatVTONPipeline:
         # Denoising loop
         extra_step_kwargs = self.prepare_extra_step_kwargs(generator, eta)
         num_warmup_steps = (len(timesteps) - num_inference_steps * self.noise_scheduler.order)
-        with tqdm.tqdm(total=num_inference_steps) as progress_bar:
+        with tqdm.tqdm(total=num_inference_steps, disable=True) as progress_bar:
             for i, t in enumerate(timesteps):
                 # expand the latents if we are doing classifier free guidance
                 non_inpainting_latent_model_input = (torch.cat([latents] * 2) if do_classifier_free_guidance else latents)
@@ -279,7 +279,7 @@ class CatVTONPix2PixPipeline(CatVTONPipeline):
         # Denoising loop
         extra_step_kwargs = self.prepare_extra_step_kwargs(generator, eta)
         num_warmup_steps = (len(timesteps) - num_inference_steps * self.noise_scheduler.order)
-        with tqdm.tqdm(total=num_inference_steps) as progress_bar:
+        with tqdm.tqdm(total=num_inference_steps, disable=True) as progress_bar:
             for i, t in enumerate(timesteps):
                 # expand the latents if we are doing classifier free guidance
                 latent_model_input = (torch.cat([latents] * 2) if do_classifier_free_guidance else latents)

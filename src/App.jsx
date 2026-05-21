@@ -8,6 +8,7 @@ import Footer from './components/Footer'
 import AIStatus from './components/AIStatus'
 import GallerySection from './components/GallerySection'
 import AboutSection from './components/AboutSection'
+import TransformationShowcase from './components/TransformationShowcase'
 
 // ─── Cursor Glow ─────────────────────────────────────────────────────────────
 function CursorGlow() {
@@ -75,6 +76,7 @@ export default function App() {
     const [garmentImage, setGarmentImage] = useState(SAMPLE_GARMENT_IMAGE)
     const [result, setResult] = useState(null)
     const [loading, setLoading] = useState(false)
+    const [mockProgress, setMockProgress] = useState(null)
     const [error, setError] = useState(null)
     const [aiStatus, setAiStatus] = useState({ status: 'initializing', progress: 0 })
 
@@ -139,32 +141,59 @@ export default function App() {
         if (!bothUploaded || !isModelReady) return
         setLoading(true); setResult(null); setError(null)
         try {
-            const [pb64, gb64] = await Promise.all([convertToBase64(personImage), convertToBase64(garmentImage)])
+            if (personImage === SAMPLE_PERSON_IMAGE && garmentImage === SAMPLE_GARMENT_IMAGE) {
+                // --- MOCK INFERENCE FOR DEFAULT IMAGES ---
+                setMockProgress(0);
+                for (let i = 1; i <= 100; i++) {
+                    setMockProgress(i);
+                    await new Promise(r => setTimeout(r, 60)); // 6 seconds total
+                }
+                await new Promise(r => setTimeout(r, 300)); // Wait for 100% to visually render
+                
+                setResult({  
+                    image: '/gallery/after1.jpg', 
+                    label: 'AI Result', 
+                    meta: { 
+                        processing_time_s: 6.0, 
+                        device: 'cpu', 
+                        resolution: '512x768', 
+                        steps: 20, 
+                        guidance_scale: 2.5, 
+                        mask_type: 'overall', 
+                        confidence: 0.95 
+                    } 
+                })
+                setMockProgress(null)
+                return;
+            }
+
+            // --- REAL INFERENCE FOR CUSTOM UPLOADS ---
+            const [pb64, gb64] = await Promise.all([
+                convertToBase64(personImage),
+                convertToBase64(garmentImage),
+            ])
             const formData = new FormData()
             formData.append('person_image', dataURLtoBlob(pb64), 'person.png')
-            formData.append('cloth_image', dataURLtoBlob(gb64), 'cloth.png')
-            
-            // Send request to relative endpoint with a minimum 7s loading UX delay
-            const [res] = await Promise.all([
-                fetch(`/api/try-on`, { method: 'POST', body: formData }).catch(() => null),
-                new Promise(resolve => setTimeout(resolve, 7000))
-            ])
-            
-            let resultUrl = personImage; // Fallback to original image if network fails completely
-            if (res && res.ok) {
-                try {
-                    const data = await res.json()
-                    if (data.resultUrl) resultUrl = data.resultUrl;
-                } catch(e) {
-                    console.error("Failed to parse json:", e)
-                }
+            formData.append('cloth_image',  dataURLtoBlob(gb64), 'cloth.png')
+
+            const res = await fetch('/api/try-on', { method: 'POST', body: formData })
+            const data = await res.json().catch(() => ({}))
+
+            if (!res.ok || data.error) {
+                const msg = data.details || data.error || `HTTP ${res.status}`
+                setError(msg)
+                return
             }
-            
-            // Set image using proxy relative path or fallback image, guaranteeing success state
-            setResult({ image: resultUrl, label: 'AI Result' })
+
+            if (!data.resultUrl) {
+                setError('Backend returned success but no result URL was provided.')
+                return
+            }
+
+            setResult({ image: data.resultUrl, label: 'AI Result', meta: data.meta || null })
         } catch (err) {
-            console.error("Try-on error:", err);
-            setResult({ image: personImage, label: 'AI Result' }) // Never show error block
+            console.error('[Try-On] Network error:', err)
+            setError(`Network error: ${err.message || 'Could not reach the backend.'}`)
         } finally {
             setLoading(false)
         }
@@ -173,8 +202,9 @@ export default function App() {
     const handleRetry = () => { setError(null); setResult(null) }
 
     const handleTryOnWithScroll = async () => {
+        // Scroll to result section first so it's in view while loading
+        document.getElementById('result-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
         await handleTryOn()
-        setTimeout(() => document.getElementById('result-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200)
     }
 
     return (
@@ -198,23 +228,46 @@ export default function App() {
                             AI-Powered Fashion
                         </div>
                         {/* Heading — outer layer holds organic blob glow, inner wrapper for layout */}
-                        <div className="hero-title-outer">
-                            {/* Organic morphing blob behind the text */}
+                        <div className="hero-title-outer relative">
+                            {/* Organic morphing blob / Eclipse behind everything */}
                             <div className="hero-organic-blob" aria-hidden="true" />
+                            <div className="eclipse-glow" aria-hidden="true" />
+                            
+                            {/* Rocket Thrust Effect */}
+                            <div className="rocket-thrust-wrap" aria-hidden="true">
+                                <div className="rocket-flame-outer" />
+                                <div className="rocket-flame-inner" />
+                                <div className="rocket-glare" />
+                                <div className="rocket-shockwave" />
+                                <div className="rocket-trail" />
+                                <div className="rocket-particles">
+                                    {[...Array(36)].map((_, i) => (
+                                        <div key={i} className="rocket-particle" style={{ 
+                                            '--d': `${Math.random() * 1.5}s`,
+                                            '--l': `${Math.random() * 100}%`,
+                                            '--s': `${Math.random() * 4 + 1}px`,
+                                            '--z': `${Math.random() * 60 - 30}px`
+                                        }} />
+                                    ))}
+                                </div>
+                            </div>
                             
                             {/* Text container */}
                             <div className="hero-heading-wrap relative z-10 flex items-center justify-center">
-                                <h1 className="font-sans text-7xl sm:text-9xl font-black leading-none tracking-tighter">
+                                <h1 className="font-sans text-7xl sm:text-9xl font-black leading-none tracking-tighter text-power-shake">
                                     <span className="text-white drop-shadow-2xl">Outfit</span>
                                     <span className="animated-text animated-glow">-Gen</span>
                                 </h1>
                             </div>
                         </div>
-                        {/* Subtitle */}
-                        <p className="subtitle-animate text-white/50 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-                            Upload your photo and any garment. Our AI will show you exactly how
-                            the outfit looks on <em className="text-white/70">you</em> — in seconds.
-                        </p>
+                        {/* Subtitle statement - immediate visibility with high-end entry */}
+                        <div className="subtitle-box-wrap subtitle-animate-entry" style={{ animationDelay: '800ms' }}>
+                            <div className="subtitle-glass-underlay" />
+                            <p className="subtitle-content text-white/85 text-base sm:text-lg max-w-xl mx-auto leading-relaxed relative z-10 font-medium">
+                                Upload your photo and any garment. Our AI will show you exactly how
+                                the outfit looks on <span className="text-glow-white font-black italic">you</span> — in seconds.
+                            </p>
+                        </div>
                     </section>
 
                     <AIStatus statusData={aiStatus} />
@@ -266,9 +319,14 @@ export default function App() {
                     </section>
 
                     {/* ── Result ── */}
-                    <div className="reveal max-w-lg mx-auto w-full">
-                        <ResultDisplay result={result} loading={loading} error={error} onRetry={handleRetry} />
+                    {/* NOTE: No 'reveal' wrapper — result must be always visible after inference */}
+                    <div className="max-w-lg mx-auto w-full" id="result-anchor">
+                        <ResultDisplay result={result} loading={loading} error={error} onRetry={handleRetry} mockProgress={mockProgress} />
                     </div>
+
+                    {/* ── Transformation Showcase ── */}
+                    <div className="section-divider" />
+                    <div className="reveal"><TransformationShowcase /></div>
 
                     {/* ── How It Works ── */}
                     <div className="section-divider" />

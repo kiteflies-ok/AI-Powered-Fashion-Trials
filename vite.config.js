@@ -7,12 +7,17 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:5000',
-        changeOrigin: true
+        changeOrigin: true,
+        timeout: 1200000,
       },
       '/outputs': {
         target: 'http://127.0.0.1:5000',
-        changeOrigin: true
-      }
+        changeOrigin: true,
+      },
+      '/debug': {
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true,
+      },
     },
   },
 })

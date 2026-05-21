@@ -39,6 +39,8 @@ export default {
                 'shimmer':    'shimmer 1.6s infinite',
                 'spin-slow':  'spin 3s linear infinite',
                 'gradient':   'gradientShift 5s ease infinite',
+                'scan-loop':  'scanLoop 3s linear infinite',
+                'scale-in':   'scaleIn 0.3s cubic-bezier(0.34,1.56,0.64,1)',
             },
             keyframes: {
                 fadeIn: {
@@ -64,6 +66,16 @@ export default {
                 gradientShift: {
                     '0%,100%': { backgroundPosition: '0% 50%' },
                     '50%':     { backgroundPosition: '100% 50%' },
+                },
+                scanLoop: {
+                    '0%':   { top: '0%', opacity: '0' },
+                    '5%':   { opacity: '1' },
+                    '95%':  { opacity: '1' },
+                    '100%': { top: '100%', opacity: '0' },
+                },
+                scaleIn: {
+                    '0%':   { transform: 'scale(0)', opacity: '0' },
+                    '100%': { transform: 'scale(1)', opacity: '1' },
                 },
             },
             boxShadow: {

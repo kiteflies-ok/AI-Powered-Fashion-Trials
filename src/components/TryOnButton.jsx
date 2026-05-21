@@ -20,21 +20,22 @@ export default function TryOnButton({ onClick, disabled, loading }) {
         <div className="flex flex-col items-center gap-3">
             <button
                 id="try-on-btn"
-                className="btn-primary min-w-[220px]"
+                className={`btn-primary w-[200px] h-[50px] ${loading ? 'opacity-90 cursor-wait' : ''}`}
                 onClick={(e) => { if (!disabled && !loading) { addRipple(e); onClick() } }}
                 disabled={disabled || loading}
                 aria-label="Try on the garment"
+                style={loading ? { transform: 'scale(0.98)', transition: 'transform 0.4s ease' } : {}}
             >
                 {loading ? (
-                    <>
-                        <Loader2 size={18} className="animate-spin" />
-                        <span>Processing…</span>
-                    </>
+                    <div className="flex items-center justify-center gap-2 w-full h-full">
+                        <Loader2 size={18} className="animate-spin opacity-80" />
+                        <span className="font-medium opacity-90">Processing...</span>
+                    </div>
                 ) : (
-                    <>
-                        <Sparkles size={18} className="animate-float" style={{ animationDuration: '2s' }} />
-                        <span>Try It On</span>
-                    </>
+                    <div className="flex items-center justify-center gap-2 w-full h-full">
+                        <Sparkles size={18} className="animate-float opacity-90" style={{ animationDuration: '2s' }} />
+                        <span className="font-medium">Try It On</span>
+                    </div>
                 )}
             </button>
 

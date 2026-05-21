@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,600;0,900;1,400&display=swap');
+
 /* 
   Outfit-Gen Premium UI Design System
   Restored and Optimized for high-end aesthetic performance.
@@ -13,8 +15,6 @@
   --glass-bg: rgba(255, 255, 255, 0.04);
   --glass-border: rgba(255, 255, 255, 0.08);
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,600;0,900;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -154,7 +154,7 @@
   border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
   animation: organicMorph 8s ease-in-out infinite alternate;
   filter: blur(40px);
-  z-index: 0;
+  z-index: -2;
 }
 
 @keyframes organicMorph {
@@ -162,20 +162,189 @@
   100% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; transform: scale(1.1) rotate(5deg); }
 }
 
+.eclipse-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, #0a0a0f 20%, #f43f5e 45%, rgba(139, 92, 246, 0.4) 60%, transparent 80%);
+  filter: blur(25px);
+  z-index: -1;
+  opacity: 0.4;
+  border-radius: 50%;
+  animation: eclipsePulse 5s ease-in-out infinite alternate;
+}
+
+@keyframes eclipsePulse {
+  0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.3; }
+  100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.5; }
+}
+
 .animated-text {
-  background: linear-gradient(90deg, #fff, #f43f5e, #fff);
-  background-size: 200% auto;
+  background: linear-gradient(135deg, 
+    #38bdf8 0%, 
+    #8b5cf6 25%, 
+    #f43f5e 50%, 
+    #fb923c 75%, 
+    #facc15 100%
+  );
+  background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: textShimmer 4s linear infinite;
+  animation: textShimmer 6s ease-in-out infinite alternate;
 }
 
 @keyframes textShimmer {
-  to { background-position: 200% center; }
+  0% { background-position: 0% center; }
+  100% { background-position: 100% center; }
 }
 
 .animated-glow {
-  text-shadow: 0 0 20px rgba(244, 63, 94, 0.4);
+  text-shadow: 
+    0 0 30px rgba(139, 92, 246, 0.4), 
+    0 0 60px rgba(251, 146, 60, 0.2),
+    0 0 90px rgba(250, 204, 21, 0.1);
+}
+
+/* ── Rocket Thrust Effect ── */
+.rocket-thrust-wrap {
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 200px;
+  z-index: 1;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rocket-flame-outer {
+  width: 200px;
+  height: 350px;
+  background: linear-gradient(to bottom, 
+    rgba(251, 146, 60, 0.5) 0%,
+    rgba(250, 204, 21, 0.3) 50%,
+    rgba(251, 146, 60, 0) 100%
+  );
+  clip-path: polygon(45% 0%, 55% 0%, 100% 100%, 0% 100%);
+  filter: blur(35px);
+  animation: thrustFlicker 3s ease-in-out infinite alternate;
+  opacity: 0.6;
+}
+
+.rocket-flame-inner {
+  position: absolute;
+  top: 0;
+  width: 100px;
+  height: 250px;
+  background: linear-gradient(to bottom, 
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(250, 204, 21, 0.7) 20%,
+    rgba(251, 146, 60, 0.4) 60%,
+    transparent 100%
+  );
+  clip-path: polygon(45% 0%, 55% 0%, 85% 100%, 15% 100%);
+  filter: blur(20px);
+  animation: thrustFlicker 2.5s ease-in-out infinite alternate-reverse;
+  opacity: 0.8;
+  z-index: 2;
+}
+
+.rocket-glare {
+  position: absolute;
+  top: -60px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(250, 204, 21, 0.2) 0%, rgba(251, 146, 60, 0.1) 30%, transparent 70%);
+  filter: blur(40px);
+  animation: glarePulse 4s ease-in-out infinite alternate;
+  z-index: 3;
+}
+
+/* Soothing Ambient Wave instead of Dramatic Shockwave */
+.rocket-shockwave {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  width: 250px;
+  height: 250px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.02) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: shockwavePulse 6s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.rocket-trail {
+  position: absolute;
+  top: 100px;
+  width: 600px;
+  height: 700px;
+  background: radial-gradient(ellipse at top, rgba(251, 146, 60, 0.08) 0%, transparent 70%);
+  filter: blur(80px);
+  z-index: -1;
+}
+
+.rocket-particles {
+  position: absolute;
+  top: 150px;
+  width: 200px;
+  height: 400px;
+  perspective: 1200px;
+}
+
+.rocket-particle {
+  position: absolute;
+  top: 0;
+  left: var(--l);
+  width: var(--s);
+  height: calc(var(--s) * 3); /* Softer stream */
+  background: linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(250, 204, 21, 0.5));
+  border-radius: 100px;
+  box-shadow: 0 0 20px rgba(251, 146, 60, 0.4);
+  transform: translateZ(var(--z));
+  animation: particleThrust 2.5s ease-in infinite;
+  animation-delay: var(--d);
+  opacity: 0;
+}
+
+/* Removed aggressive shake, replaced with a gentle float */
+.text-power-shake {
+  animation: powerFloat 4s ease-in-out infinite alternate;
+}
+
+@keyframes thrustFlicker {
+  0% { transform: scaleY(0.95); opacity: 0.5; filter: blur(35px); }
+  100% { transform: scaleY(1.05); opacity: 0.7; filter: blur(45px); }
+}
+
+@keyframes glarePulse {
+  0% { transform: scale(0.95); opacity: 0.6; }
+  100% { transform: scale(1.1); opacity: 0.9; }
+}
+
+@keyframes shockwavePulse {
+  0% { transform: translateX(-50%) scale(0.2); opacity: 0; }
+  30% { opacity: 0.5; }
+  100% { transform: translateX(-50%) scale(2); opacity: 0; }
+}
+
+@keyframes particleThrust {
+  0% { transform: translateY(-20px) translateZ(var(--z)) scaleY(0.5); opacity: 0; filter: blur(2px); }
+  30% { opacity: 0.6; filter: blur(4px); }
+  100% { transform: translateY(300px) translateZ(var(--z)) scaleY(1.5); opacity: 0; filter: blur(8px); }
+}
+
+@keyframes powerFloat {
+  0% { transform: translateY(1px); }
+  100% { transform: translateY(-1px); }
 }
 
 /* ── Buttons & UI Components ── */
@@ -251,6 +420,45 @@
 }
 @keyframes revealIn {
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Subtitle UX & Transitions ── */
+.subtitle-box-wrap {
+  position: relative;
+  padding: 1.5rem 2rem;
+  margin-top: 1rem;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.subtitle-animate-entry {
+  animation: subtitleReveal 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes subtitleReveal {
+  0% { opacity: 0; transform: translateY(20px); filter: blur(10px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+.subtitle-glass-underlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 0%, transparent 80%);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 2rem;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.subtitle-content {
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.text-glow-white {
+  color: #fff;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.4);
+  position: relative;
 }
 
 /* ── Custom Scrollbar ── */
