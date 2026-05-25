@@ -20,21 +20,21 @@ Outfit-Gen contains multiple architectural designs tailored for different enviro
 
 ```mermaid
 graph TD
-    subgraph Local Development (Active Stack)
-        Vite[React + Vite Frontend] -->|Proxy /api/*| Flask[Flask API Server]
-        Flask -->|Inference Lock| CatVTON[CatVTON Pipeline + AutoMasker]
+    subgraph local_dev ["Local Development (Active Stack)"]
+        Vite["React + Vite Frontend"] -->|Proxy /api/*| Flask["Flask API Server"]
+        Flask -->|Inference Lock| CatVTON["CatVTON Pipeline + AutoMasker"]
     end
 
-    subgraph Production Architecture (Docker-Compose)
-        NextJS[Next.js Frontend] --> FastAPI[FastAPI Server]
-        FastAPI --> Redis[(Redis Message Broker)]
-        Redis --> Celery[Celery Workers]
-        Celery --> Replicate[Replicate IDM-VTON API]
+    subgraph prod_arch ["Production Architecture (Docker-Compose)"]
+        NextJS["Next.js Frontend"] --> FastAPI["FastAPI Server"]
+        FastAPI --> Redis[("Redis Message Broker")]
+        Redis --> Celery["Celery Workers"]
+        Celery --> Replicate["Replicate IDM-VTON API"]
     end
 
-    subgraph Cloud Deployment
-        HF[HuggingFace Space] --> Gradio[Gradio Web UI]
-        Gradio --> ZeroGPU[ZeroGPU Pipeline]
+    subgraph cloud_deploy ["Cloud Deployment"]
+        HF["HuggingFace Space"] --> Gradio["Gradio Web UI"]
+        Gradio --> ZeroGPU["ZeroGPU Pipeline"]
     end
 ```
 
