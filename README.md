@@ -4,6 +4,8 @@ Outfit-Gen is a high-fidelity, open-source AI Virtual Try-On application designe
 
 ---
 
+https://github.com/user-attachments/assets/8913b8d3-6a5a-499b-9cf5-61a90d4b1f6e
+
 ## 🌟 Key Features
 
 - **Interactive Try-On Studio**: Drag-and-drop / click-to-upload interface featuring dynamic 3D perspective tilt cards, visual scanline loading, and a custom particle engine.
