@@ -16,3 +16,6 @@ backend/venv
 backend/__pycache__
 virtual-tryon/frontend/.next
 virtual-tryon/frontend/node_modules
+backend/static/debug/
+backend/static/outputs/
+backend/static/uploads/

@@ -15,12 +15,8 @@ export default function Header() {
 
                 {/* Logo */}
                 <Link to="/" className="flex items-center gap-2.5 group">
-                    <div className="gradient-border-logo w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300
-                                    group-hover:scale-110">
-                        <div className="w-full h-full rounded-xl flex items-center justify-center"
-                             style={{ background: 'linear-gradient(135deg, #f43f5e 0%, #9f1239 100%)' }}>
-                            <Wand2 size={15} className="text-white" strokeWidth={2} />
-                        </div>
+                    <div className="w-9 h-9 flex items-center justify-center transition-all duration-300 group-hover:scale-110">
+                        <img src="/favicon.svg" alt="Outfit-Gen Logo" className="w-full h-full object-contain" />
                     </div>
                     <span className="font-sans text-white font-bold text-xl leading-none tracking-tight">
                         Outfit<span className="gradient-text">-Gen</span>

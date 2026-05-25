@@ -357,17 +357,17 @@ export default function GallerySection() {
     setResultUrl(null)
     setErrorMsg(null)
 
-    // Simulate progress
-    let step = 0
-    timerRef.current = setInterval(() => {
-      step++
-      if (step < LOAD_STEPS.length - 1) { // Leave at last step until inference completes
-        setStepIdx(step)
-      }
-    }, STEP_DURATION_MS)
-
     try {
-      // Fetch both Unsplash images as Blobs (bypassing cache to prevent CORS errors from cached non-CORS imgs)
+      // Start the UI simulation timer
+      let step = 0
+      timerRef.current = setInterval(() => {
+        if (step < LOAD_STEPS.length - 1) {
+          step++
+          setStepIdx(step)
+        }
+      }, STEP_DURATION_MS)
+
+      // Fetch images as Blobs
       const [modelBlob, garmentBlob] = await Promise.all([
         fetch(selected.model, { cache: 'no-cache' }).then(r => r.blob()),
         fetch(selected.garment, { cache: 'no-cache' }).then(r => r.blob())
@@ -377,19 +377,26 @@ export default function GallerySection() {
       formData.append('person_image', modelBlob, 'person.jpg')
       formData.append('cloth_image', garmentBlob, 'cloth.jpg')
 
-      const res = await fetch('/api/try-on', { method: 'POST', body: formData })
+      // Enforce a minimum delay so the user sees all 4 steps (LOAD_STEPS.length * STEP_DURATION_MS)
+      const minDelayMs = LOAD_STEPS.length * STEP_DURATION_MS;
+      const minDelayPromise = new Promise(resolve => setTimeout(resolve, minDelayMs));
+
+      // Run inference and minimum delay in parallel
+      const [res] = await Promise.all([
+        fetch('/api/try-on', { method: 'POST', body: formData }),
+        minDelayPromise
+      ]);
+
       const data = await res.json().catch(() => ({}))
 
       if (!res.ok || data.error) {
         throw new Error(data.details || data.error || `HTTP ${res.status}`)
       }
 
+      clearInterval(timerRef.current)
       setStepIdx(LOAD_STEPS.length - 1)
-      setTimeout(() => {
-        clearInterval(timerRef.current)
-        setResultUrl(data.resultUrl)
-        setPhase('done')
-      }, 500)
+      setResultUrl(data.resultUrl)
+      setPhase('done')
 
     } catch (err) {
       clearInterval(timerRef.current)

@@ -1,49 +1,97 @@
-# AI-Powered Fashion Trials
+# Outfit-Gen: AI-Powered Virtual Try-On System
 
-An entirely self-contained, open-source AI Virtual Try-On application. The frontend uses **React + Vite** and the backend is a native **Python Flask** wrapper around the state-of-the-art **CatVTON** deep learning model.
+Outfit-Gen is a high-fidelity, open-source AI Virtual Try-On application designed to seamlessly project garments onto photos of individuals. By utilizing a diffusion-based deep learning pipeline, the application allows users to upload a photo of themselves and an outfit to see how it looks in real-time.
 
-## Prerequisites
-- **Node.js** (v18+)
-- **Python** (v3.10+) 
-- **Git**
+---
 
-## Setup & Installation
+## 🌟 Key Features
 
-### 1. Install Frontend Dependencies
-From the root directory, simply run:
-```bash
-npm install
+- **Interactive Try-On Studio**: Drag-and-drop / click-to-upload interface featuring dynamic 3D perspective tilt cards, visual scanline loading, and a custom particle engine.
+- **Before-and-After Slider**: Interactive sliding overlay to compare the original image and the generated virtual try-on result.
+- **Studio Gallery**: Pre-curated catalog of models and garments with filtering options. Features smart outfit matching that auto-selects combinations with consistent gender, pose, and lighting.
+- **Hardware-Adaptive AI Engine**: Automatic fallback detection to run optimally on Nvidia GPUs (CUDA), Intel Arc GPUs (DirectML), or CPU.
+- **Visual Micro-Animations**: Sleek design featuring custom glassmorphism, responsive cursor glow, morphing background blobs, and an animated rocket thrust heading effect.
+
+---
+
+## ⚙️ Project Architectures
+
+Outfit-Gen contains multiple architectural designs tailored for different environments:
+
+```mermaid
+graph TD
+    subgraph Local Development (Active Stack)
+        Vite[React + Vite Frontend] <-->|Proxy /api/*| Flask[Flask API Server]
+        Flask <-->|Inference Lock| CatVTON[CatVTON Pipeline + AutoMasker]
+    end
+
+    subgraph Production Architecture (Docker-Compose)
+        NextJS[Next.js Frontend] <--> FastAPI[FastAPI Server]
+        FastAPI <--> Redis[(Redis Message Broker)]
+        Redis <--> Celery[Celery Workers]
+        Celery <--> Replicate[Replicate IDM-VTON API]
+    end
+
+    subgraph Cloud Deployment
+        HF[HuggingFace Space] <--> Gradio[Gradio Web UI]
+        Gradio <--> ZeroGPU[ZeroGPU Pipeline]
+    end
 ```
 
-### 2. Set Up the Python Backend
-Because the AI processing happens exactly on your machine implicitly through Hugging Face, you need to populate the backend with the required AI libraries:
+### 1. Local Development (Flask + Vite)
+- **Frontend**: Single-Page React App built on Vite, utilizing TailwindCSS and custom HSL colors. It polls the backend health status and handles canvas image transformations before uploading.
+- **Backend**: Synchronous Flask server that locks CUDA inference to one job at a time. It manages local file storage, serves the generated outputs, and loads PyTorch model weights on startup in a daemon thread.
 
-```bash
-# Navigate to backend
-cd backend
+### 2. Production Architecture (Dockerized FastAPI + Celery)
+- **Frontend**: Next.js web client communicating via WebSockets for real-time job state notifications.
+- **Backend Orchestration**: An asynchronous FastAPI gateway that routes tasks to a Celery worker pool backed by Redis.
+- **AI Processing**: Calls the cloud-based Replicate API running the IDM-VTON model, freeing up local system resources.
 
-# Create a virtual environment (Windows)
-python -m venv venv
-.\venv\Scripts\activate
+### 3. HuggingFace Spaces Deployment
+- A standalone Gradio web app designed to be hosted directly on HuggingFace.
+- Utilizes HuggingFace's ZeroGPU `@spaces.GPU` decorator to dynamically allocate GPU compute per request, leveraging attention slicing to keep memory footprints low.
 
-# Install the Python dependencies (Diffusers, PyTorch, Gradio adapters)
-pip install -r requirements.txt
-```
+---
 
-> **Note on Hardware Requirements:** 
-> The backend gracefully degrades based on your hardware. If an NVIDIA GPU (CUDA) is detected, it will run optimally. If an Intel Arc GPU is detected, it falls back to the `torch-directml` tensor interface. If neither is available, it silently falls back to standard CPU inference. CPU inference can take 2-5 minutes per request. 
+## 🧠 AI Model & Inference Pipeline
 
-### 3. Missing `detectron2` or Compiling Errors (Windows)
-The native `AutoMasker` dynamically imports complex mapping structures, which sometimes trigger C++ build errors on Windows. If your `pip install` fails constantly due to Windows building errors, consider replacing standard CPU inference with an online inference wrapper like Replicate. 
+The core try-on pipeline is powered by **CatVTON** (Concatenation-based Virtual Try-ON), a deep learning model that stitches garment and person features directly inside the attention mechanism of a Stable Diffusion inpainting model.
 
-## Running the Application Locally
-Once both the Node modules and Python packages are installed, you don't actually need to start them separately! 
+1. **AutoMasker Generation**:
+   - Uses **DensePose** to parse the person's body part segments.
+   - Combines it with **SCHP (Self-Correction for Human Parsing)** to refine the garment contours.
+   - Automatically determines whether an `upper`, `lower`, or `overall` torso mask is required based on garment aspect ratios.
+   
+2. **Diffusion Processing**:
+   - Resizes input images to 384×512 (aspect ratio optimized for local inference speed).
+   - Feeds the original image, target garment image, and generated binary mask to the CatVTON pipeline.
+   - Executes diffusion across 15 steps (local CPU/GPU default) or 40 steps (cloud GPU) with a guidance scale of 2.5.
+   - Applies Gaussian blur to mask margins for natural fabric blending.
 
-Return to your project root `virtual-try-on/` and run:
-```bash
-npm run dev:all
-```
-This single command spins up both the Flask backend on `http://localhost:5000` and the Vite frontend on `http://localhost:5173/` simultaneously. 
+---
 
-* The very first time it boots, the backend silently pulls down the ~10GB model weights into your `.cache/huggingface/` directory over the HF mirror network.
-* When the UI initializes, just upload your images and hit **Try It On**. The resulting deep-learning composite will be served locally into your `backend/static/outputs/` directory.
+## 🛠️ Technology Stack
+
+| Layer | Technologies Used |
+| :--- | :--- |
+| **Frontend UI** | React 18, Vite 5, TailwindCSS 3, Lucide Icons, Canvas API |
+| **Interactive Components** | Intersection Observer (Scroll Reveal), Custom Cursor Glow, 3D Card Tilt Hook, Before-After Slider |
+| **Active Local Backend** | Python 3.10+, Flask, PyTorch, Hugging Face Hub Client |
+| **Alternative Backend** | FastAPI, Celery, Redis, Docker Compose |
+| **Cloud Deployment** | Gradio, HuggingFace Spaces (ZeroGPU) |
+| **AI Models** | CatVTON (zhengchong/CatVTON), DensePose, SCHP, IDM-VTON (yisol/idm-vton) |
+
+---
+
+## 📂 Repository Layout
+
+- [src/](file:///d:/Repo/Vrtual-try-system/src) — Single-page React frontend application.
+  - [components/](file:///d:/Repo/Vrtual-try-system/src/components) — Interactive elements like [ImageUploadCard.jsx](file:///d:/Repo/Vrtual-try-system/src/components/ImageUploadCard.jsx), [ResultDisplay.jsx](file:///d:/Repo/Vrtual-try-system/src/components/ResultDisplay.jsx), [GallerySection.jsx](file:///d:/Repo/Vrtual-try-system/src/components/GallerySection.jsx), and [BeforeAfterSlider.jsx](file:///d:/Repo/Vrtual-try-system/src/components/BeforeAfterSlider.jsx).
+  - [index.css](file:///d:/Repo/Vrtual-try-system/src/index.css) — Custom animations, noise textures, glassmorphism styles, and CSS blobs.
+- [backend/](file:///d:/Repo/Vrtual-try-system/backend) — Native Flask API server wrapping local PyTorch CatVTON.
+  - [app.py](file:///d:/Repo/Vrtual-try-system/backend/app.py) — Main entry point for Flask endpoints.
+  - [catvton_app/](file:///d:/Repo/Vrtual-try-system/backend/catvton_app) — Core model pipeline classes, cloth masking logic, and DensePose helpers.
+- [virtual-tryon/](file:///d:/Repo/Vrtual-try-system/virtual-tryon) — Celery + Redis + FastAPI production Docker application.
+- [hf_space/](file:///d:/Repo/Vrtual-try-system/hf_space) — Codebase for hosting a demo directly on HuggingFace Space.
+- [PROJECT_OVERVIEW.js](file:///d:/Repo/Vrtual-try-system/PROJECT_OVERVIEW.js) — Detailed developer map of the repository's code flows and architecture.
+
